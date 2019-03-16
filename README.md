@@ -80,3 +80,14 @@ python frozen_lake_q_miguel_morales.py 8
 python cart_pole.py  
 To replicate the episode/reward plot:  
 python plotting_service.py  
+
+## GridWorld from AI Modern Approach ##
+#### Value Iteration ####
+python mdp.py small v  
+or  
+python mdp.py large v  
+* 'small' will run the 3x4 grid described in our lecture and AI - Modern Approach  
+* 'large' will run a 300x400 grid  
+* prints the calculated V matrix as a result of VALUE Iteration  
+* prints a visualization of the policy  
+

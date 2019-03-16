@@ -11,7 +11,8 @@ from utils import argmax, vector_add, orientations, turn_right, turn_left, print
 import random
 import numpy as np
 from collections import defaultdict
-import grid_service
+import policy_service, grid_service, stats_service
+import sys, time
 
 
 class MDP:
@@ -202,6 +203,7 @@ def value_iteration(mdp, epsilon=0.001):
 
     U1 = {s: 0 for s in mdp.states}
     R, T, gamma = mdp.R, mdp.T, mdp.gamma
+    number_iterations = 0
     while True:
         U = U1.copy()
         delta = 0
@@ -209,8 +211,9 @@ def value_iteration(mdp, epsilon=0.001):
             U1[s] = R(s) + gamma * max(sum(p * U[s1] for (p, s1) in T(s, a))
                                        for a in mdp.actions(s))
             delta = max(delta, abs(U1[s] - U[s]))
+        number_iterations += 1
         if delta <= epsilon * (1 - gamma) / gamma:
-            return U
+            return U, number_iterations
 
 
 def best_policy(mdp, U):
@@ -453,19 +456,62 @@ def pomdp_value_iteration(pomdp, epsilon=0.1):
                 return U
 
 
-grid_300x400, terminals_300x400 = grid_service.construct_grid_and_terminals(30, 40)
+def run_value_iteration(number_trials=1, grid_world_shape=(3, 4)):
 
-sequential_decision_environment_300x400 = GridMDP(grid_300x400, terminals_300x400)
+    number_iterations_list = []
+    trial_times = []
 
-grid_to_process = sequential_decision_environment_300x400
-# grid_to_process = sequential_decision_environment
+    for trial in range(number_trials):
+        start_time = time.time()
+        V, number_iterations = value_iteration(grid_to_process, .01)
+        trial_times.append(time.time() - start_time)
+        number_iterations_list.append(number_iterations)
 
-pi = best_policy(grid_to_process, value_iteration(grid_to_process, .01))
+    stats_service.print_convergence_stats(number_trials, number_iterations_list, trial_times)
 
-grid_to_process.to_arrows(pi)
+    policy_service.print_V_ai_modern_approach(V, (grid_to_process.rows, grid_to_process.cols))
+    pi = best_policy(grid_to_process, V)
 
-print_table(grid_to_process.to_arrows(pi))
+    grid_to_process.to_arrows(pi)
 
-print('-----------------------------------------------------------------')
+    print_table(grid_to_process.to_arrows(pi))
 
-print_table(grid_to_process.to_arrows(policy_iteration(grid_to_process)))
+    # policy_success_rate, mean_number_steps_per_success_episode = policy_service.follow_policy(env, pi, number_episodes=number_trials)
+    #
+    # stats_service.print_success_stats(policy_success_rate, mean_number_steps_per_success_episode)
+    # return policy_success_rate
+
+
+
+if __name__ == '__main__':
+
+    if len(sys.argv) < 2:
+        print('Value Iteration: python mdp.py small v')
+        print('or')
+        print('Value Iteration: python mdp.py large v')
+        print('Same for Policy Iteration - just replace the   v    with a    p')
+        exit()
+
+    np.set_printoptions(precision=3)
+
+    grid_size = sys.argv[1]
+    if grid_size == 'small':
+        grid_to_process = sequential_decision_environment
+    else:
+        grid_300x400, terminals_300x400 = grid_service.construct_grid_and_terminals(30, 40)
+        sequential_decision_environment_300x400 = GridMDP(grid_300x400, terminals_300x400)
+        grid_to_process = sequential_decision_environment_300x400
+
+    function_to_run = sys.argv[2]
+    if function_to_run == 'v':
+        run_value_iteration(number_trials=100, grid_world_shape=(grid_to_process.rows, grid_to_process.cols))
+    elif function_to_run == 'p':
+        pass
+    else:
+        print("Only v and pare val id command line options")
+
+
+
+# print('-----------------------------------------------------------------')
+#
+# print_table(grid_to_process.to_arrows(policy_iteration(grid_to_process)))

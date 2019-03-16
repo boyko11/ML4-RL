@@ -85,9 +85,9 @@ def print_policy(pie, env):
     #             print('----------------------------------------------------------')
 
 
-def print_V(V, env):
+def print_V(V, shape):
 
-    V_to_be_printed = np.reshape(V, env.desc.shape)
+    V_to_be_printed = np.reshape(V, shape)
 
     print("V values: ")
     separator_line = '-' * ((V_to_be_printed.shape[1] * 10) + 1)
@@ -101,3 +101,15 @@ def print_V(V, env):
 
 
 
+def print_V_ai_modern_approach(values_dictionary, shape):
+
+    v_matrix = np.zeros(shape, dtype=np.float64)
+
+    for k, v in values_dictionary.items():
+        column_index = k[0]
+        row_index = k[1]
+        v_matrix[row_index, column_index] = v
+
+    v_matrix = np.flip(v_matrix, 0)
+
+    print_V(v_matrix, shape)

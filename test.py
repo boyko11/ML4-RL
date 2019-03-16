@@ -5,6 +5,39 @@ import policy_iteration
 from gym.envs.registration import register
 from collections import deque
 
+
+np.set_printoptions(precision=3)
+values = {
+
+(0, 1): 0.3981020383060546,
+(1, 2): 0.6495806461716868,
+(3, 2): 1.0,
+(0, 0): 0.2954354062836363,
+(3, 0): 0.12958868267972745,
+(3, 1): -1.0,
+(2, 1): 0.48643676237737926,
+(2, 0): 0.34461306281476806,
+(2, 2): 0.7953609368471095,
+(1, 0): 0.25348746162470537,
+(0, 2): 0.5092854564622092
+}
+
+shape = (3, 4)
+v_matrix = np.zeros(shape, dtype=np.float64)
+
+for k, v in values.items():
+    column_index = k[0]
+    row_index = k[1]
+    v_matrix[row_index, column_index] = round(v, 3)
+
+v_matrix = np.flip(v_matrix, 0)
+
+policy_service.print_V(v_matrix, shape)
+
+print(v_matrix)
+exit()
+
+
 # test_array = np.array([1, 2, 3, 4, 5])
 #
 # selections = []
@@ -92,7 +125,7 @@ print("Using Miguel Morales' code as benchmark Start")
 print("Policy to be evaluated: ")
 policy_service.print_policy(pi, frozen_lake_env)
 V = policy_evaluation(pi, frozen_lake_env.P)
-policy_service.print_V(V, frozen_lake_env)
+policy_service.print_V(V, frozen_lake_env.desc.shape)
 improved_pi = policy_improvement(pi, V, frozen_lake_env.P)
 print("Improved policy: ")
 policy_service.print_policy(improved_pi, frozen_lake_env)
@@ -105,7 +138,7 @@ print("This implementation Start")
 print("Policy to be evaluated: ")
 policy_service.print_policy(pi, frozen_lake_env)
 V = policy_iteration.evaluate_policy(pi, frozen_lake_env)
-policy_service.print_V(V, frozen_lake_env)
+policy_service.print_V(V, frozen_lake_env.desc.shape)
 improved_pi = policy_service.get_optimal_policy_from_V_and_P(V, frozen_lake_env.P, range(frozen_lake_env.nA))
 print("Improved policy: ")
 policy_service.print_policy(improved_pi, frozen_lake_env)

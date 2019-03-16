@@ -21,7 +21,7 @@ def run_value_iteration(env, gamma=0.9):
 
     stats_service.print_convergence_stats(number_trials, number_iterations_list, trial_times)
 
-    policy_service.print_V(V, env)
+    policy_service.print_V(V, env.desc.shape)
 
     optimal_policy = policy_service.get_optimal_policy_from_V_and_P(V, env.P, range(env.nA))
 
