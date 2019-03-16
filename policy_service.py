@@ -52,6 +52,55 @@ def follow_policy(env, policy, number_episodes=10):
     # print("Success Rate: {0}".format(success_rate))
     return success_rate, mean_number_steps_per_successful_episode
 
+def follow_policy_ai_modern_approach(grid_mdp, policy, number_episodes=10):
+    # > > >.
+    # ^ None ^.
+    # ^ > ^ <
+    #
+    # {
+    #
+    #     (0, 1): (0, 1),
+    #     (1, 2): (1, 0),
+    #     (3, 2): None,
+    #     (0, 0): (0, 1),
+    #     (3, 0): (-1, 0),
+    #     (3, 1): None,
+    #     (2, 1): (0, 1),
+    #     (2, 0): (0, 1),
+    #     (2, 2): (1, 0),
+    #     (1, 0): (1, 0),
+    #     (0, 2): (1, 0)
+    #
+    # }
+
+    success_count = 0
+    number_steps_list = []
+    for episode in range(number_episodes):
+        done = False
+        number_steps_this_episode = 0
+        current_state = (0, 0)
+
+        while not done:
+            number_steps_this_episode += 1
+            action_for_current_state = policy[current_state]
+            new_state = grid_mdp.go(current_state, action_for_current_state)
+            reward_for_new_state = grid_mdp.reward[new_state]
+
+            current_state = new_state
+
+            if reward_for_new_state == 1:
+                done = True
+                success_count += 1
+                number_steps_list.append(number_steps_this_episode)
+            elif reward_for_new_state == -1:
+                done = True
+
+
+    mean_number_steps_per_successful_episode = np.mean(np.array(number_steps_list))
+    success_rate = float(success_count) / float(number_episodes)
+    # print("Success Rate: {0}".format(success_rate))
+    return success_rate, mean_number_steps_per_successful_episode
+
 
 def print_policy(pie, env):
 

@@ -85,8 +85,11 @@ python plotting_service.py
 #### Value Iteration ####
 python mdp.py small v  
 or  
+python mdp.py medium v  
+or  
 python mdp.py large v  
 * 'small' will run the 3x4 grid described in our lecture and AI - Modern Approach  
+* 'medium' will run a 30x40 grid  
 * 'large' will run a 300x400 grid  
 * prints the calculated V matrix as a result of VALUE Iteration  
 * prints a visualization of the policy  

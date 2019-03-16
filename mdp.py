@@ -456,30 +456,30 @@ def pomdp_value_iteration(pomdp, epsilon=0.1):
                 return U
 
 
-def run_value_iteration(number_trials=1, grid_world_shape=(3, 4)):
+def run_value_iteration(number_trials=1, grid_mdp=None):
 
     number_iterations_list = []
     trial_times = []
 
     for trial in range(number_trials):
         start_time = time.time()
-        V, number_iterations = value_iteration(grid_to_process, .01)
+        V, number_iterations = value_iteration(grid_mdp, .00001)
         trial_times.append(time.time() - start_time)
         number_iterations_list.append(number_iterations)
 
     stats_service.print_convergence_stats(number_trials, number_iterations_list, trial_times)
 
-    policy_service.print_V_ai_modern_approach(V, (grid_to_process.rows, grid_to_process.cols))
-    pi = best_policy(grid_to_process, V)
+    policy_service.print_V_ai_modern_approach(V, (grid_mdp.rows, grid_to_process.cols))
+    pi = best_policy(grid_mdp, V)
 
-    grid_to_process.to_arrows(pi)
+    grid_mdp.to_arrows(pi)
 
-    print_table(grid_to_process.to_arrows(pi))
+    print_table(grid_mdp.to_arrows(pi))
 
-    # policy_success_rate, mean_number_steps_per_success_episode = policy_service.follow_policy(env, pi, number_episodes=number_trials)
-    #
-    # stats_service.print_success_stats(policy_success_rate, mean_number_steps_per_success_episode)
-    # return policy_success_rate
+    policy_success_rate, mean_number_steps_per_success_episode = policy_service.follow_policy_ai_modern_approach(grid_mdp, pi, number_episodes=number_trials)
+
+    stats_service.print_success_stats(policy_success_rate, mean_number_steps_per_success_episode)
+    return policy_success_rate
 
 
 
@@ -497,14 +497,21 @@ if __name__ == '__main__':
     grid_size = sys.argv[1]
     if grid_size == 'small':
         grid_to_process = sequential_decision_environment
-    else:
-        grid_300x400, terminals_300x400 = grid_service.construct_grid_and_terminals(30, 40)
+        number_trials = 100
+    elif grid_size == 'medium':
+        number_trials = 10
+        grid_30x40, terminals_30x40 = grid_service.construct_grid_and_terminals(30, 40)
+        sequential_decision_environment_30x40 = GridMDP(grid_30x40, terminals_30x40)
+        grid_to_process = sequential_decision_environment_30x40
+    elif grid_size == 'large':
+        number_trials = 1
+        grid_300x400, terminals_300x400 = grid_service.construct_grid_and_terminals(300, 400)
         sequential_decision_environment_300x400 = GridMDP(grid_300x400, terminals_300x400)
         grid_to_process = sequential_decision_environment_300x400
 
     function_to_run = sys.argv[2]
     if function_to_run == 'v':
-        run_value_iteration(number_trials=100, grid_world_shape=(grid_to_process.rows, grid_to_process.cols))
+        run_value_iteration(number_trials=number_trials, grid_mdp=grid_to_process)
     elif function_to_run == 'p':
         pass
     else:
