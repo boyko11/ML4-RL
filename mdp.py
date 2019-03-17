@@ -208,8 +208,7 @@ def value_iteration(mdp, epsilon=0.001):
         U = U1.copy()
         delta = 0
         for s in mdp.states:
-            U1[s] = R(s) + gamma * max(sum(p * U[s1] for (p, s1) in T(s, a))
-                                       for a in mdp.actions(s))
+            U1[s] = R(s) + gamma * max(sum(p * U[s1] for (p, s1) in T(s, a)) for a in mdp.actions(s))
             delta = max(delta, abs(U1[s] - U[s]))
         number_iterations += 1
         if delta <= epsilon * (1 - gamma) / gamma:
@@ -240,6 +239,7 @@ def policy_iteration(mdp):
 
     U = {s: 0 for s in mdp.states}
     pi = {s: random.choice(mdp.actions(s)) for s in mdp.states}
+    number_iterations = 0
     while True:
         U = policy_evaluation(pi, U, mdp)
         unchanged = True
@@ -248,8 +248,9 @@ def policy_iteration(mdp):
             if a != pi[s]:
                 pi[s] = a
                 unchanged = False
+        number_iterations += 1
         if unchanged:
-            return pi
+            return pi, number_iterations
 
 
 def policy_evaluation(pi, U, mdp, k=20):
@@ -458,12 +459,13 @@ def pomdp_value_iteration(pomdp, epsilon=0.1):
 
 def run_value_iteration(number_trials=1, grid_mdp=None):
 
+    print('Running Value Iteration.')
     number_iterations_list = []
     trial_times = []
 
     for trial in range(number_trials):
         start_time = time.time()
-        V, number_iterations = value_iteration(grid_mdp, .00001)
+        V, number_iterations = value_iteration(grid_mdp, .0000000000000000000000001)
         trial_times.append(time.time() - start_time)
         number_iterations_list.append(number_iterations)
 
@@ -480,6 +482,34 @@ def run_value_iteration(number_trials=1, grid_mdp=None):
 
     stats_service.print_success_stats(policy_success_rate, mean_number_steps_per_success_episode)
     return policy_success_rate
+
+
+def run_policy_iteration(number_trials=1, grid_mdp=None):
+
+    print('Running Policy Iteration.')
+    number_iterations_list = []
+    trial_times = []
+
+    for trial in range(number_trials):
+        start_time = time.time()
+        pi, number_iterations = policy_iteration(grid_mdp)
+        trial_times.append(time.time() - start_time)
+        number_iterations_list.append(number_iterations)
+
+    stats_service.print_convergence_stats(number_trials, number_iterations_list, trial_times)
+
+    grid_mdp.to_arrows(pi)
+
+    print_table(grid_mdp.to_arrows(pi))
+
+    policy_success_rate, mean_number_steps_per_success_episode = policy_service.follow_policy_ai_modern_approach(grid_mdp, pi, number_episodes=number_trials)
+
+    stats_service.print_success_stats(policy_success_rate, mean_number_steps_per_success_episode)
+    return policy_success_rate
+
+# print('-----------------------------------------------------------------')
+#
+# print_table(grid_to_process.to_arrows(policy_iteration(grid_to_process)))
 
 
 
@@ -505,20 +535,14 @@ if __name__ == '__main__':
         grid_to_process = sequential_decision_environment_30x40
     elif grid_size == 'large':
         number_trials = 1
-        grid_300x400, terminals_300x400 = grid_service.construct_grid_and_terminals(300, 400)
-        sequential_decision_environment_300x400 = GridMDP(grid_300x400, terminals_300x400)
-        grid_to_process = sequential_decision_environment_300x400
+        grid_120x160, terminals_120x160 = grid_service.construct_grid_and_terminals(120, 160)
+        sequential_decision_environment_120x160 = GridMDP(grid_120x160, terminals_120x160)
+        grid_to_process = sequential_decision_environment_120x160
 
     function_to_run = sys.argv[2]
     if function_to_run == 'v':
         run_value_iteration(number_trials=number_trials, grid_mdp=grid_to_process)
     elif function_to_run == 'p':
-        pass
+        run_policy_iteration(number_trials=number_trials, grid_mdp=grid_to_process)
     else:
-        print("Only v and pare val id command line options")
-
-
-
-# print('-----------------------------------------------------------------')
-#
-# print_table(grid_to_process.to_arrows(policy_iteration(grid_to_process)))
+        print("Only v and p are valid command line options")

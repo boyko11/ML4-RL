@@ -5,6 +5,26 @@ import policy_iteration
 from gym.envs.registration import register
 from collections import deque
 
+transition_probabilities = [(0.8, (0, 1)), (0.1, (1, 0)), (0.1, (0, 0))]
+
+next_states_probs = [prob_next_state_tuple[0] for prob_next_state_tuple in transition_probabilities]
+
+next_states = [prob_next_state_tuple[1] for prob_next_state_tuple in transition_probabilities]
+sample = np.random.choice(len(next_states), 1, p=next_states_probs)[0]
+
+print(next_states_probs)
+
+print(next_states)
+
+samples = []
+for i in range(100):
+    sample = np.random.choice(len(next_states), 1, p=next_states_probs)[0]
+    samples.append(sample)
+
+from collections import Counter
+print(Counter(samples))
+
+exit()
 
 np.set_printoptions(precision=3)
 values = {

@@ -93,4 +93,14 @@ python mdp.py large v
 * 'large' will run a 300x400 grid  
 * prints the calculated V matrix as a result of VALUE Iteration  
 * prints a visualization of the policy  
+* prints stats  
+
+#### Policy Iteration ####
+python mdp.py small p    
+or  
+python mdp.py medium p    
+or  
+python mdp.py large p  
+* prints a visualization of the policy  
+* prints stats   
 

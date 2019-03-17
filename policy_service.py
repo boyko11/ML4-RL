@@ -83,7 +83,12 @@ def follow_policy_ai_modern_approach(grid_mdp, policy, number_episodes=10):
         while not done:
             number_steps_this_episode += 1
             action_for_current_state = policy[current_state]
-            new_state = grid_mdp.go(current_state, action_for_current_state)
+            transition_probabilities = grid_mdp.calculate_T(current_state, action_for_current_state)
+            next_states_probs = [prob_next_state_tuple[0] for prob_next_state_tuple in transition_probabilities]
+
+            next_states = [prob_next_state_tuple[1] for prob_next_state_tuple in transition_probabilities]
+            sample = np.random.choice(len(next_states), 1, p=next_states_probs)[0]
+            new_state = next_states[sample]
             reward_for_new_state = grid_mdp.reward[new_state]
 
             current_state = new_state
